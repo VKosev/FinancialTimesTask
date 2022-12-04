@@ -10,11 +10,16 @@ import (
 	"time"
 
 	"github.com/vkosev/ft_api/internal/config"
+	"github.com/vkosev/ft_api/internal/expression"
+	"github.com/vkosev/ft_api/internal/persistance"
+	"github.com/vkosev/ft_api/internal/web/routes"
 )
+
+const loggerPrefix = "ft.api | "
 
 func main() {
 	// initialize logger
-	logger := log.New(os.Stdout, "ft.api", log.LstdFlags)
+	logger := log.New(os.Stdout, loggerPrefix, log.LstdFlags)
 
 	// initialize configuration
 	config, err := config.New()
@@ -24,7 +29,8 @@ func main() {
 	}
 
 	// initialize the api routes
-	router := routes.Init(config)
+	resolver := expression.NewResolver(logger, persistance.NewConnection())
+	router := routes.Init(logger, resolver)
 
 	// create a new server
 	s := http.Server{
@@ -61,5 +67,4 @@ func main() {
 	// gracefully shutdown the server, waiting max 30 seconds for current operations to complete
 	ctx, _ := context.WithTimeout(context.Background(), 30*time.Second)
 	s.Shutdown(ctx)
-
 }

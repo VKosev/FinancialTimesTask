@@ -1,25 +1,41 @@
 package model
 
+import "github.com/vkosev/ft_api/internal/expression"
+
+// swagger:model ExpressionRequest
 type ExpressionRequest struct {
-	expression string `json:"expression"`
+	// Text expression to be resolved
+	Expression string `json:"expression"`
 }
 
+// swagger:model EvaluatedExpressionResponse
 type EvaluatedExpressionResponse struct {
-	result int `json:"result"`
+	// Result of the evaluated expression
+	Result int `json:"result"`
 }
 
 type InvalidExpressionResponse struct {
-	valid  bool   `json:"valid"`
-	reason string `json:"reason"`
+	Valid  bool   `json:"valid"`
+	Reason string `json:"reason"`
 }
 
 type ValidExpressionResponse struct {
-	valid bool `json:"valid"`
+	Valid bool `json:"valid"`
 }
 
-type ErrorResponse struct {
-	expression string `json:"expression"`
-	endpoint   string `json:"endpoint"`
-	frequency  int    `json:"frequency"`
-	errType    string `json:"type"`
+type ExpressionErrorResponse struct {
+	Type    expression.ErrorType `json:"type"`
+	Message string               `json:"message"`
+}
+
+type ErrorHistoryResponse struct {
+	Expression string               `json:"expression"`
+	Endpoints  []ErrorEndpoint      `json:"endpoints"`
+	Frequency  int                  `json:"frequency"`
+	ErrType    expression.ErrorType `json:"type"`
+}
+
+type ErrorEndpoint struct {
+	Url   string
+	Count int
 }
