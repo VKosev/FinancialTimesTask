@@ -2,6 +2,9 @@ package expression
 
 import "regexp"
 
+// isValid validates wether the passes string is valid expressions text.
+//
+// Returns nil if valid, otherwise error which can be casted to ExpressionError.
 func isValid(expr string) error {
 	if err := isNonMathQuestion(expr); err != nil {
 		return err
@@ -15,6 +18,9 @@ func isValid(expr string) error {
 	return nil
 }
 
+// isNonMathQuestion checks if the passed string is non mathematical questions.
+//
+// Returns error if true, otherwise nil
 func isNonMathQuestion(expr string) error {
 	startWithMathQuestionPattern := regexp.MustCompile(`What\sis\s\d+\s(plus|multiplied|minus|divided)\s\d+`)
 	matchNumbersPattern := regexp.MustCompile(matchNumbersRegexExpression)

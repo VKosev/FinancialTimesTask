@@ -16,10 +16,17 @@ type Connection struct {
 
 // errorEntity is the type the connection package uses for persisting and retrieving expression errors.
 type errorEntity struct {
+	// the expression for which the erro occured
 	Expression string
-	Endpoints  map[string]int
-	Frequency  int
-	ErrType    expression.ErrorType
+	// Endpoints map represents the urls on which the error occured.
+	//
+	// key - represents the url
+	// value - represents the number of times this url with this expression recieved an error
+	Endpoints map[string]int
+	// how many times the expression recieved an error
+	Frequency int
+	// the type of the expression error
+	ErrType expression.ErrorType
 }
 
 // NewConnection creates a persistance connection.
@@ -60,6 +67,8 @@ func (c *Connection) Save(err expression.ExpressionError, url string) error {
 	return nil
 }
 
+// GetAll returns all persisted errors
+// slice of as  expression.ErrorHistory.
 func (c *Connection) GetAll() []expression.ErrorHistory {
 	var errors []expression.ErrorHistory
 

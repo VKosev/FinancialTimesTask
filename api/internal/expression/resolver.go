@@ -18,6 +18,7 @@ type Resolver struct {
 	ep ErrorPersister
 }
 
+// NewResolver returns a pointer to new instance of Resolver.
 func NewResolver(l *log.Logger, ep ErrorPersister) *Resolver {
 	return &Resolver{
 		l:  l,
@@ -25,6 +26,13 @@ func NewResolver(l *log.Logger, ep ErrorPersister) *Resolver {
 	}
 }
 
+// Evaluate evaluates a text exression.
+//
+// returns:
+//		int if evaluation is sucessfull
+//		error which can be casted to ExpressionError,
+//		for expression related error.
+// 		Normal error for other issues.
 func (r *Resolver) Evaluate(expr string, url string) (int, error) {
 	if err := isValid(expr); err != nil {
 		if e, ok := IsExpressionError(err); ok {
@@ -94,6 +102,9 @@ func (r *Resolver) resolveOperations(expr string) (int, error) {
 	return result, nil
 }
 
+// calculateArithmeticOperation tries to calculate v1 and v2 based on the passed operation.
+//
+// Returns the calculated integere and nil on success, otherwise 0 and error.
 func calculateArithmeticOperation(operation string, v1, v2 int) (int, error) {
 	fmt.Printf("CALCULATING: %d %s %d \n", v1, operation, v2)
 	switch operation {
@@ -110,6 +121,7 @@ func calculateArithmeticOperation(operation string, v1, v2 int) (int, error) {
 	}
 }
 
+// returns all found allowed operation from the passed string.
 func findAllOperations(expr string) []string {
 	pattern := regexp.MustCompile("plus|multiplied|minus|divided")
 

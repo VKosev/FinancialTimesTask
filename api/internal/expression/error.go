@@ -23,6 +23,7 @@ type ErrorPersister interface {
 	GetAll() []ErrorHistory
 }
 
+// ExpressionError is returned for expression related problems.
 type ExpressionError struct {
 	Msg        string
 	Expression string
@@ -33,6 +34,10 @@ func (e ExpressionError) Error() string {
 	return e.Msg
 }
 
+// IsExpressionError validates if error can be casted to ExpressionError.
+//
+// Returns the successfully casted ExpressionError and true if sucessfull
+// otherwise nil and false.
 func IsExpressionError(err error) (ExpressionError, bool) {
 	e, ok := err.(ExpressionError)
 	if ok {
@@ -42,13 +47,22 @@ func IsExpressionError(err error) (ExpressionError, bool) {
 	return ExpressionError{}, false
 }
 
+// ErrorHistory is returned when retrieving persisted errors.
 type ErrorHistory struct {
+	// The expression for which the error occured.
 	Expression string
-	Endpoints  map[string]int
-	Frequency  int
-	ErrType    ErrorType
+	// Endpoints map represents the urls on which the error occured.
+	//
+	// key - represents the url
+	// value - represents the number of times this url with this expression recieved an error
+	Endpoints map[string]int
+	// Number of times an error occured for the given expression
+	Frequency int
+	// The error type
+	ErrType ErrorType
 }
 
+// Implement the stringer inferface. Defaults to "Invalid Syntax"
 func (et ErrorType) String() string {
 	switch et {
 	case 0:
@@ -62,6 +76,10 @@ func (et ErrorType) String() string {
 	}
 }
 
+// ParseErrorType tries to parse a string into ErrorType.
+//
+// Returns the ErrorType and nil if successfull,
+// otherwise the default ErrorType and error.
 func ParseErrorType(s string) (ErrorType, error) {
 	switch s {
 	case "unsupportedOperations":
