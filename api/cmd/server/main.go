@@ -1,5 +1,19 @@
 package main
 
+// Financial Times API
+//
+//     Schemes: http
+//     Host: localhost
+//     BasePath: /
+//     Version: 0.0.1
+//
+//     Consumes:
+//     - application/json
+//
+//     Produces:
+//     - application/json
+//
+// swagger:meta
 import (
 	"context"
 	"fmt"
@@ -28,7 +42,7 @@ func main() {
 		fmt.Println("Failed to load configuration file")
 	}
 
-	// initialize the api routes
+	// initialize routes
 	resolver := expression.NewResolver(logger, persistance.NewConnection())
 	router := routes.Init(logger, resolver)
 
@@ -37,9 +51,9 @@ func main() {
 		Addr:         ":" + config.Server.Port, // configure the bind address
 		Handler:      router,                   // set the default handler
 		ErrorLog:     logger,                   // set the logger for the server
-		ReadTimeout:  5 * time.Second,          // max time to read request from the client
+		ReadTimeout:  10 * time.Second,         // max time to read request from the client
 		WriteTimeout: 10 * time.Second,         // max time to write response to the client
-		IdleTimeout:  3600 * time.Second,       // max time for connections using TCP Keep-Alive
+		IdleTimeout:  10 * time.Second,         // max time for connections using TCP Keep-Alive
 	}
 
 	// start the server
@@ -55,7 +69,7 @@ func main() {
 		logger.Println("Server started.")
 	}()
 
-	// trap sigterm or interupt and gracefully shutdown the server
+	// trap sigterm or interrupt and gracefully shutdown the server
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, os.Interrupt)
 	signal.Notify(c, os.Kill)

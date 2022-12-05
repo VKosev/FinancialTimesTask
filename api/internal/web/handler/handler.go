@@ -22,11 +22,6 @@ func NewHandler(l *log.Logger, resolver *expression.Resolver) *Handler {
 	}
 }
 
-// swagger:route POST /posts PostsList
-// Evaluates an arithmetic expression
-//
-// responses:
-//  200: PostResponse
 func (h *Handler) Evaluate(w http.ResponseWriter, req *http.Request) {
 	reqBody := &model.ExpressionRequest{}
 

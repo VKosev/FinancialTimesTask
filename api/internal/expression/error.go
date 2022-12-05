@@ -5,6 +5,7 @@ import (
 	"errors"
 )
 
+// swagger:enum ErrorType
 type ErrorType int
 
 const (

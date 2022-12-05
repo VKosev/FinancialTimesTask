@@ -2,38 +2,68 @@ package model
 
 import "github.com/vkosev/ft_api/internal/expression"
 
-// swagger:model ExpressionRequest
 type ExpressionRequest struct {
 	// Text expression to be resolved
+	// example: What is 5 plus 3 multiplied by 2?
+	// required: true
+	// in:body
 	Expression string `json:"expression"`
 }
 
-// swagger:model EvaluatedExpressionResponse
+// swagger:parameters Expression
+type RequestBody struct {
+	// Text expression to be resolved
+	// example: What is 5 plus 3 multiplied by 2?
+	// required: true
+	// in:body
+	Body ExpressionRequest
+}
+
+// swagger:model EvaluatedExpression
 type EvaluatedExpressionResponse struct {
 	// Result of the evaluated expression
+	// example: 11
 	Result int `json:"result"`
 }
 
+// swagger:model InvalidExpression
 type InvalidExpressionResponse struct {
-	Valid  bool   `json:"valid"`
+	// Boolean value true if valid, false if not
+	// example: false
+	Valid bool `json:"valid"`
+	// Reason why expression is not valid
 	Reason string `json:"reason"`
 }
 
+// swagger:model ValidExpression
 type ValidExpressionResponse struct {
+	// Boolean value true if valid, false if not
 	Valid bool `json:"valid"`
 }
 
+// swagger:model ExpressionError
 type ExpressionErrorResponse struct {
-	Type    expression.ErrorType `json:"type"`
-	Message string               `json:"message"`
+	// Type of the error
+	Type expression.ErrorType `json:"type"`
+	// Message of the error
+	Message string `json:"message"`
 }
 
+// swagger:model ErrorHistory
 type ErrorHistoryResponse struct {
-	Expression string               `json:"expression"`
-	Endpoints  []ErrorEndpoint      `json:"endpoints"`
-	Frequency  int                  `json:"frequency"`
-	ErrType    expression.ErrorType `json:"type"`
+	// The expression for which the error occurred
+	Expression string `json:"expression"`
+	// The endpoints on which the error occurred
+	// collection format: slice
+	Endpoints []ErrorEndpoint `json:"endpoints"`
+	// Count of the number of times the error occurred for this expression
+	Frequency int `json:"frequency"`
+	// Type of the error
+	ErrType expression.ErrorType `json:"type"`
 }
+
+// swagger:model Message
+type _ string
 
 type ErrorEndpoint struct {
 	Url   string
