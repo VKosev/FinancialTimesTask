@@ -1,0 +1,161 @@
+definitions:
+    Error:
+        properties:
+            endpoints:
+                description: |-
+                    The endpoints on which the error occurred
+                    collection format: slice
+                items:
+                    $ref: '#/definitions/ErrorEndpoint'
+                type: array
+                x-go-name: Endpoints
+            expression:
+                description: The expression for which the error occurred
+                type: string
+                x-go-name: Expression
+            frequency:
+                description: Count of the number of times the error occurred for this expression
+                format: int64
+                type: integer
+                x-go-name: Frequency
+            type:
+                description: Type of the error
+                x-go-name: ErrType
+        type: object
+        x-go-name: ErrorHistoryResponse
+        x-go-package: github.com/vkosev/ft_api/internal/web/model
+    ErrorEndpoint:
+        properties:
+            Count:
+                format: int64
+                type: integer
+            Url:
+                type: string
+        type: object
+        x-go-package: github.com/vkosev/ft_api/internal/web/model
+    EvaluatedExpression:
+        properties:
+            result:
+                description: Result of the evaluated expression
+                example: 11
+                format: int64
+                type: integer
+                x-go-name: Result
+        type: object
+        x-go-name: EvaluatedExpressionResponse
+        x-go-package: github.com/vkosev/ft_api/internal/web/model
+    ExpressionError:
+        properties:
+            message:
+                description: Message of the error
+                type: string
+                x-go-name: Message
+            type:
+                description: Type of the error
+                x-go-name: Type
+        type: object
+        x-go-name: ExpressionErrorResponse
+        x-go-package: github.com/vkosev/ft_api/internal/web/model
+    ExpressionErrors:
+        properties:
+            Errors:
+                description: 'collection format: slice'
+                items:
+                    $ref: '#/definitions/Error'
+                type: array
+        type: object
+        x-go-name: ErrorHistoriesResponse
+        x-go-package: github.com/vkosev/ft_api/internal/web/model
+    ExpressionRequest:
+        properties:
+            expression:
+                description: Text expression to be resolved
+                example: What is 5 plus 3 multiplied by 2?
+                type: string
+                x-go-name: Expression
+        required:
+            - expression
+        type: object
+        x-go-package: github.com/vkosev/ft_api/internal/web/model
+    InvalidExpression:
+        properties:
+            reason:
+                description: Reason why expression is not valid
+                type: string
+                x-go-name: Reason
+            valid:
+                description: Boolean value true if valid, false if not
+                example: false
+                type: boolean
+                x-go-name: Valid
+        type: object
+        x-go-name: InvalidExpressionResponse
+        x-go-package: github.com/vkosev/ft_api/internal/web/model
+    Message:
+        type: string
+        x-go-name: _
+        x-go-package: github.com/vkosev/ft_api/internal/web/model
+    ValidExpression:
+        properties:
+            valid:
+                description: Boolean value true if valid, false if not
+                type: boolean
+                x-go-name: Valid
+        type: object
+        x-go-name: ValidExpressionResponse
+        x-go-package: github.com/vkosev/ft_api/internal/web/model
+info: {}
+paths:
+    /errors:
+        get:
+            description: Returns all occurred expression errors
+            operationId: ErrorHistory
+            responses:
+                "200":
+                    description: ExpressionErrors
+                    schema:
+                        $ref: '#/definitions/ExpressionErrors'
+                "500":
+                    description: Message
+                    schema:
+                        $ref: '#/definitions/Message'
+    /expression:
+        post:
+            description: Evaluates an arithmetic text expression
+            operationId: Expression
+            parameters:
+                - in: body
+                  name: Body
+                  schema:
+                    $ref: '#/definitions/ExpressionRequest'
+            responses:
+                "200":
+                    description: EvaluatedExpression
+                    schema:
+                        $ref: '#/definitions/EvaluatedExpression'
+                "400":
+                    description: ExpressionError
+                    schema:
+                        $ref: '#/definitions/ExpressionError'
+                "500":
+                    description: Message
+                    schema:
+                        $ref: '#/definitions/Message'
+    /validate:
+        post:
+            description: Checks wether expression is valid
+            operationId: ValidExpression
+            responses:
+                "200":
+                    description: ValidExpression
+                    schema:
+                        $ref: '#/definitions/ValidExpression'
+                "400":
+                    description: InvalidExpression
+                    schema:
+                        $ref: '#/definitions/InvalidExpression'
+                "500":
+                    description: Message
+                    schema:
+                        $ref: '#/definitions/Message'
+swagger: "2.0"

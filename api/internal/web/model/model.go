@@ -10,15 +10,6 @@ type ExpressionRequest struct {
 	Expression string `json:"expression"`
 }
 
-// swagger:parameters Expression
-type RequestBody struct {
-	// Text expression to be resolved
-	// example: What is 5 plus 3 multiplied by 2?
-	// required: true
-	// in:body
-	Body ExpressionRequest
-}
-
 // swagger:model EvaluatedExpression
 type EvaluatedExpressionResponse struct {
 	// Result of the evaluated expression
@@ -49,7 +40,7 @@ type ExpressionErrorResponse struct {
 	Message string `json:"message"`
 }
 
-// swagger:model ErrorHistory
+// swagger:model Error
 type ErrorHistoryResponse struct {
 	// The expression for which the error occurred
 	Expression string `json:"expression"`
@@ -61,9 +52,6 @@ type ErrorHistoryResponse struct {
 	// Type of the error
 	ErrType expression.ErrorType `json:"type"`
 }
-
-// swagger:model Message
-type _ string
 
 type ErrorEndpoint struct {
 	Url   string

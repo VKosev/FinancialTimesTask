@@ -39,11 +39,11 @@ func Init(logger *log.Logger, resolver *expression.Resolver) *mux.Router {
 
 	// swagger:route GET /errors ErrorHistory
 	//
-	// Checks wether expression is valid
+	// Returns all occurred expression errors
 	//
 	//
 	// responses:
-	//   200: ErrorHistory
+	//   200: ExpressionErrors
 	//   500: Message
 	router.HandleFunc("/errors", h.AllErrors).Methods("GET")
 
