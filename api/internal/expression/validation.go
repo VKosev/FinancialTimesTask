@@ -2,6 +2,9 @@ package expression
 
 import "regexp"
 
+var startAsExpressionPattern *regexp.Regexp = regexp.MustCompile(`What\sis\s\d+\s`)
+var endsWithNumberAndQuestionMarkPattern *regexp.Regexp = regexp.MustCompile(`\d+\?$|\w+\?$`)
+
 // isValid validates wether the passes string is valid expressions text.
 //
 // Returns nil if valid, otherwise error which can be casted to ExpressionError.
@@ -10,8 +13,11 @@ func isValid(expr string) error {
 		return err
 	}
 
-	err := isUnsupportedOperations(expr)
-	if err != nil {
+	if err := isUnsupportedOperations(expr); err != nil {
+		return err
+	}
+
+	if err := isInvalidSyntaxError(expr); err != nil {
 		return err
 	}
 
@@ -36,21 +42,81 @@ func isNonMathQuestion(expr string) error {
 	return nil
 }
 
+// isUnsupportedOperations check if the passed string contains unsupported operations.
+//
+// Returns error if true, otherwise nil
 func isUnsupportedOperations(expr string) error {
-	startAsExpressionPattern := regexp.MustCompile(`What\sis\s\d+\s`)
-	endsWithNumberAndQuestionMarkPattern := regexp.MustCompile(`\d+\?$|\w+\?$`)
+	containsSupportedOperationsPattern := regexp.MustCompile(`plus\s\d+|minus\s\d+|multiplied\sby\s\d+|divided\sby\s\d+`)
 
 	if startAsExpressionPattern.MatchString(expr) && endsWithNumberAndQuestionMarkPattern.MatchString(expr) {
-		containsSupportedOperationsPattern := regexp.MustCompile(`plus\s\d+|minus\s\d+|multiplied\sby\s\d+|divided\sby\s\d+`)
-
 		if !containsSupportedOperationsPattern.MatchString(expr) {
-			return ExpressionError{
-				Msg:        "Expression contains unsupported operations",
-				Expression: expr,
-				ErrType:    UnsupportedOperations,
-			}
+			return NewUnsupportedExpressionError(expr)
 		}
 	}
 
+	finalOperationIsSupported := regexp.MustCompile(`multiplied\sby\s\d+\?$|divided\sby\s\d+\?$|plus\s\d+\?$|minus\s\d+\?$`)
+	if containsSupportedOperationsPattern.MatchString(expr) && !finalOperationIsSupported.MatchString(expr) {
+		return NewUnsupportedExpressionError(expr)
+	}
+
 	return nil
+}
+
+func isInvalidSyntaxError(expr string) error {
+	if !isNonMathQuestionOrUnsupportedOperation(expr) {
+		validAndInvalidOperations := regexp.MustCompile(`plus[a-zA-Z a-zA-Z]*|minus[a-zA-Z a-zA-Z]*|multiplied\sby[a-zA-Z a-zA-Z]*|divided\sby[a-zA-Z a-zA-Z]*`)
+
+		matchedStrings := validAndInvalidOperations.FindAllString(expr, -1)
+
+		if len(matchedStrings) == 0 {
+			return NewInvalidSyntaxExpressionError(expr, "Expression does not contain operations")
+		}
+
+		if !containsOnlySupportedOperations(matchedStrings) {
+			return NewInvalidSyntaxExpressionError(expr, "Expression is not valid")
+		}
+
+	}
+
+	return nil
+}
+
+func containsOnlySupportedOperations(words []string) bool {
+	matchValidOperationPattern := regexp.MustCompile(`plus\s|minus\s|divided\sby\s|multiplied\sby\s`)
+
+	for _, word := range words {
+		if !matchValidOperationPattern.MatchString(word) {
+			return false
+		}
+	}
+
+	return true
+}
+
+func isNonMathQuestionOrUnsupportedOperation(expr string) bool {
+	if err := isNonMathQuestion(expr); err != nil {
+		return true
+	}
+
+	if err := isUnsupportedOperations(expr); err != nil {
+		return true
+	}
+
+	return false
+}
+
+func NewUnsupportedExpressionError(expr string) ExpressionError {
+	return ExpressionError{
+		Msg:        "Expression contains unsupported operations",
+		Expression: expr,
+		ErrType:    UnsupportedOperations,
+	}
+}
+
+func NewInvalidSyntaxExpressionError(expr, msg string) ExpressionError {
+	return ExpressionError{
+		Msg:        msg,
+		Expression: expr,
+		ErrType:    InvalidSyntax,
+	}
 }

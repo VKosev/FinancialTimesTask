@@ -28,15 +28,15 @@ func NewHandler(l *log.Logger, resolver *expression.Resolver) *Handler {
 // responses:
 //  200: PostResponse
 func (h *Handler) Evaluate(w http.ResponseWriter, req *http.Request) {
-	body := &model.ExpressionRequest{}
+	reqBody := &model.ExpressionRequest{}
 
-	err := json.NewDecoder(req.Body).Decode(body)
+	err := json.NewDecoder(req.Body).Decode(reqBody)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	evaluatedExpression, err := h.resolver.Evaluate(body.Expression, req.URL.Path)
+	evaluatedExpression, err := h.resolver.Evaluate(reqBody.Expression, req.URL.Path)
 	if err != nil {
 		if e, ok := expression.IsExpressionError(err); ok {
 			writeJSON(w, http.StatusBadRequest, model.ExpressionErrorResponse{
@@ -45,13 +45,42 @@ func (h *Handler) Evaluate(w http.ResponseWriter, req *http.Request) {
 			})
 			return
 		}
-		http.Error(w, err.Error(), http.StatusBadRequest)
 
+		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
 	writeJSON(w, http.StatusOK, model.EvaluatedExpressionResponse{
 		Result: evaluatedExpression,
+	})
+}
+
+func (h *Handler) Validate(w http.ResponseWriter, req *http.Request) {
+	reqBody := &model.ExpressionRequest{}
+
+	err := json.NewDecoder(req.Body).Decode(reqBody)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	err = h.resolver.Validate(reqBody.Expression, req.URL.Path)
+	if err != nil {
+		if e, ok := expression.IsExpressionError(err); ok {
+			writeJSON(w, http.StatusBadRequest, model.InvalidExpressionResponse{
+				Valid:  false,
+				Reason: e.Msg,
+			})
+
+			return
+		}
+
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	writeJSON(w, http.StatusOK, model.ValidExpressionResponse{
+		Valid: true,
 	})
 }
 
@@ -90,7 +119,11 @@ func convertToErrorEndpoints(m map[string]int) []model.ErrorEndpoint {
 }
 
 func writeJSON(w http.ResponseWriter, status int, v any) {
+	err := json.NewEncoder(w).Encode(v)
+	if err != nil {
+		http.Error(w, "Marshalling JSON failed.", http.StatusInternalServerError)
+	}
+
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(status)
-	json.NewEncoder(w).Encode(v)
 }

@@ -39,6 +39,7 @@ func (r *Resolver) Evaluate(expr string, url string) (int, error) {
 			r.ep.Save(e, url)
 			return 0, e
 		}
+		r.l.Println("ERROR: ", err.Error())
 		return 0, err
 	}
 
@@ -48,6 +49,7 @@ func (r *Resolver) Evaluate(expr string, url string) (int, error) {
 
 	value, err := r.resolveOperations(expr)
 	if err != nil {
+		r.l.Println("ERROR: ", err.Error())
 		return 0, err
 	}
 
@@ -56,12 +58,19 @@ func (r *Resolver) Evaluate(expr string, url string) (int, error) {
 
 func (r *Resolver) Validate(expr string, url string) error {
 	if err := isValid(expr); err != nil {
+
 		if e, ok := IsExpressionError(err); ok {
-			r.ep.Save(e, url)
+
+			if err := r.ep.Save(e, url); err != nil {
+				return err
+			}
+
 			return e
 		}
+
 		return err
 	}
+
 	return nil
 }
 
