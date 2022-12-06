@@ -77,7 +77,7 @@ definitions:
             - expression
         type: object
         x-go-package: github.com/vkosev/ft_api/internal/web/model
-    InvalidExpression:
+    ExpressionResult:
         properties:
             reason:
                 description: Reason why expression is not valid
@@ -144,16 +144,17 @@ paths:
     /validate:
         post:
             description: Checks wether expression is valid
-            operationId: ValidExpression
+            operationId: ValidateExpression
+            parameters:
+                - in: body
+                  name: Body
+                  schema:
+                    $ref: '#/definitions/ExpressionRequest'
             responses:
                 "200":
-                    description: ValidExpression
+                    description: ExpressionResult
                     schema:
-                        $ref: '#/definitions/ValidExpression'
-                "400":
-                    description: InvalidExpression
-                    schema:
-                        $ref: '#/definitions/InvalidExpression'
+                        $ref: '#/definitions/ExpressionResult'
                 "500":
                     description: Message
                     schema:

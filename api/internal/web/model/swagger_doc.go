@@ -10,6 +10,12 @@ type RequestBody struct {
 	Body ExpressionRequest
 }
 
+// swagger:parameters ValidateExpression
+type ValidateExpressionBody struct {
+	// in: body
+	Body ExpressionRequest
+}
+
 // swagger:model ExpressionErrors
 type ErrorHistoriesResponse struct {
 	// collection format: slice

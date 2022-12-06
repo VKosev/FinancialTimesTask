@@ -1,7 +1,11 @@
+/*
+Copyright © 2022 NAME HERE <EMAIL ADDRESS>
+
+*/
 package main
 
-import "fmt"
+import "github.com/vkosev/ft_cli/cmd"
 
 func main() {
-	fmt.Println("Hello from CLI")
+	cmd.Execute()
 }

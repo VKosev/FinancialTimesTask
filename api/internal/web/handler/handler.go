@@ -57,7 +57,7 @@ func (h *Handler) Validate(w http.ResponseWriter, req *http.Request) {
 	err := h.resolver.Validate(reqBody.Expression, req.URL.Path)
 	if err != nil {
 		if e, ok := expression.IsExpressionError(err); ok {
-			writeJSON(w, http.StatusBadRequest, model.InvalidExpressionResponse{
+			writeJSON(w, http.StatusOK, model.InvalidExpressionResponse{
 				Valid:  false,
 				Reason: e.Msg,
 			})

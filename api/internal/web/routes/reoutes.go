@@ -26,14 +26,13 @@ func Init(logger *log.Logger, resolver *expression.Resolver) *mux.Router {
 	//   500: Message
 	router.HandleFunc("/expression", h.Evaluate).Methods("POST")
 
-	// swagger:route POST /validate ValidExpression
+	// swagger:route POST /validate ValidateExpression
 	//
 	// Checks wether expression is valid
 	//
 	//
 	// responses:
-	//   200: ValidExpression
-	//   400: InvalidExpression
+	//   200: ExpressionResult
 	//   500: Message
 	router.HandleFunc("/validate", h.Validate).Methods("POST")
 

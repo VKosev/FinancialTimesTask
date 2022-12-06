@@ -17,12 +17,13 @@ type EvaluatedExpressionResponse struct {
 	Result int `json:"result"`
 }
 
-// swagger:model InvalidExpression
+// swagger:model ExpressionResult
 type InvalidExpressionResponse struct {
 	// Boolean value true if valid, false if not
 	// example: false
 	Valid bool `json:"valid"`
 	// Reason why expression is not valid
+	// required: false
 	Reason string `json:"reason"`
 }
 

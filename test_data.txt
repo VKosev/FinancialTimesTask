@@ -1,0 +1,40 @@
+------------------------------- CLI TEST DATA -------------------------------
+EVALUATE VALID EXPRESSIONS:
+evaluate --expression "What is 43?"
+evaluate --expression "What is 5 plus 5?"
+evaluate --expression "What is 5 minus 3 multiplied by 5?"
+evaluate --expression "What is 5 minus 3 multiplied by 5 divided by 2?"
+
+EVALUATE NON MATH EXPRESSIONS:
+evaluate --expression "Where is Sofia?"
+evaluate --expression "How big is the dog?"
+evaluate --expression "What is the state of USA?"
+
+EVALUATE UNSUPPORTED OPERATION EXPRESSIONS:
+evaluate --expression "What is 52 cubed?"
+evaluate --expression "What is 5 plus 3 multiplied by 2 test by 3?
+
+EVALUATE INVALID EXPRESSIONS:
+evaluate --expression "What is 52 cubed test?"
+evaluate --expression "What is 1 plus plus 2?"
+
+VALIDATE VALID EXPRESSIONS:
+validate --expression "What is 43?"
+validate --expression "What is 5 plus 5?"
+validate --expression "What is 5 minus 3 multiplied by 5?"
+validate --expression "What is 5 minus 3 multiplied by 5 divided by 2?"
+
+VALIDATE NON MATH EXPRESSIONS:
+validate --expression "Where is Sofia?"
+validate --expression "How big is the dog?"
+validate --expression "What is the state of USA?"
+
+VALIDATE UNSUPPORTED OPERATION EXPRESSIONS:
+validate --expression "What is 52 cubed?"
+validate --expression "What is 5 plus 3 multiplied by 2 test by 3?
+
+VALIDATE INVALID EXPRESSIONS:
+validate --expression "What is 52 cubed test?"
+validate --expression "What is 1 plus plus 2?"
+-----------------------------------------------------------------------------
+

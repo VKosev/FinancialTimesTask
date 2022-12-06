@@ -1,0 +1,2 @@
+ClientApi:
+  basePath: "http://localhost:8080"
