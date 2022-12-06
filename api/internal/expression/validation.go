@@ -2,7 +2,9 @@ package expression
 
 import "regexp"
 
-var startAsExpressionPattern *regexp.Regexp = regexp.MustCompile(`What\sis\s\d+\s`)
+const msgNotValidExpression string = "Expression is not valid"
+
+var startAsExpressionPattern *regexp.Regexp = regexp.MustCompile(`What is \d+ `)
 var endsWithNumberAndQuestionMarkPattern *regexp.Regexp = regexp.MustCompile(`\d+\?$|\w+\?$`)
 
 // isValid validates wether the passes string is valid expressions text.
@@ -28,7 +30,7 @@ func isValid(expr string) error {
 //
 // Returns error if true, otherwise nil
 func isNonMathQuestion(expr string) error {
-	startWithMathQuestionPattern := regexp.MustCompile(`What\sis\s\d+\s(plus|multiplied|minus|divided)\s\d+`)
+	startWithMathQuestionPattern := regexp.MustCompile(`What is \d+ (plus|multiplied|minus|divided) \d+`)
 	matchNumbersPattern := regexp.MustCompile(matchNumbersRegexExpression)
 
 	if !startWithMathQuestionPattern.MatchString(expr) && !matchNumbersPattern.MatchString(expr) {
@@ -46,7 +48,7 @@ func isNonMathQuestion(expr string) error {
 //
 // Returns error if true, otherwise nil
 func isUnsupportedOperations(expr string) error {
-	containsSupportedOperationsPattern := regexp.MustCompile(`plus\s\d+|minus\s\d+|multiplied\sby\s\d+|divided\sby\s\d+`)
+	containsSupportedOperationsPattern := regexp.MustCompile(`plus \d+|minus \d+|multiplied by \d+|divided by \d+`)
 
 	if startAsExpressionPattern.MatchString(expr) && endsWithNumberAndQuestionMarkPattern.MatchString(expr) {
 		if !containsSupportedOperationsPattern.MatchString(expr) {
@@ -54,7 +56,7 @@ func isUnsupportedOperations(expr string) error {
 		}
 	}
 
-	finalOperationIsSupported := regexp.MustCompile(`multiplied\sby\s\d+\?$|divided\sby\s\d+\?$|plus\s\d+\?$|minus\s\d+\?$`)
+	finalOperationIsSupported := regexp.MustCompile(`multiplied by \d+\?$|divided by \d+\?$|plus \d+\?$|minus \d+\?$`)
 	if containsSupportedOperationsPattern.MatchString(expr) && !finalOperationIsSupported.MatchString(expr) {
 		return NewUnsupportedExpressionError(expr)
 	}
@@ -64,7 +66,7 @@ func isUnsupportedOperations(expr string) error {
 
 func isInvalidSyntaxError(expr string) error {
 	if !isNonMathQuestionOrUnsupportedOperation(expr) {
-		validAndInvalidOperations := regexp.MustCompile(`plus[a-zA-Z a-zA-Z]*|minus[a-zA-Z a-zA-Z]*|multiplied\sby[a-zA-Z a-zA-Z]*|divided\sby[a-zA-Z a-zA-Z]*`)
+		validAndInvalidOperations := regexp.MustCompile(`plus[a-zA-Z a-zA-Z]*|minus[a-zA-Z a-zA-Z]*|multiplied by[a-zA-Z a-zA-Z]*|divided by[a-zA-Z a-zA-Z]*`)
 
 		matchedStrings := validAndInvalidOperations.FindAllString(expr, -1)
 
@@ -72,22 +74,49 @@ func isInvalidSyntaxError(expr string) error {
 			return NewInvalidSyntaxExpressionError(expr, "Expression does not contain operations")
 		}
 
-		if !containsOnlySupportedOperations(matchedStrings) {
-			return NewInvalidSyntaxExpressionError(expr, "Expression is not valid")
+		if !eachOperationEndsWithNumber(expr) {
+			return NewInvalidSyntaxExpressionError(expr, msgNotValidExpression)
 		}
 
+		if !containsOnlySupportedOperations(matchedStrings) {
+			return NewInvalidSyntaxExpressionError(expr, msgNotValidExpression)
+		}
 	}
 
 	return nil
 }
 
 func containsOnlySupportedOperations(words []string) bool {
-	matchValidOperationPattern := regexp.MustCompile(`plus\s|minus\s|divided\sby\s|multiplied\sby\s`)
+	matchValidOperationPattern := regexp.MustCompile(`plus |minus |divided by |multiplied by `)
 
 	for _, word := range words {
 		if !matchValidOperationPattern.MatchString(word) {
 			return false
 		}
+	}
+
+	for i := 0; i < len(words); i++ {
+		if matchValidOperationPattern.MatchString(words[i]) && matchValidOperationPattern.MatchString(words[i+1]) {
+
+			return false
+		}
+	}
+
+	return true
+}
+
+func eachOperationEndsWithNumber(expr string) bool {
+	eachOperationEndsWithNumberPattern := regexp.MustCompile(`plus\s\d+|minus\s\d+|divided\sby\s\d+|multiplied\sby\s\d+`)
+
+	operations := eachOperationEndsWithNumberPattern.FindAllString(expr, -1)
+
+	stringEndsWithNumberPattern := regexp.MustCompile(`\d+$`)
+
+	for _, operation := range operations {
+		if !stringEndsWithNumberPattern.MatchString(operation) {
+			return false
+		}
+
 	}
 
 	return true

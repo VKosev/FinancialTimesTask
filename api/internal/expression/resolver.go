@@ -115,7 +115,6 @@ func (r *Resolver) resolveOperations(expr string) (int, error) {
 //
 // Returns the calculated integere and nil on success, otherwise 0 and error.
 func calculateArithmeticOperation(operation string, v1, v2 int) (int, error) {
-	fmt.Printf("CALCULATING: %d %s %d \n", v1, operation, v2)
 	switch operation {
 	case "plus":
 		return v1 + v2, nil

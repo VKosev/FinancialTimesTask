@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/go-playground/validator"
 	"github.com/vkosev/ft_api/internal/expression"
 	"github.com/vkosev/ft_api/internal/web/model"
 )
@@ -24,10 +25,7 @@ func NewHandler(l *log.Logger, resolver *expression.Resolver) *Handler {
 
 func (h *Handler) Evaluate(w http.ResponseWriter, req *http.Request) {
 	reqBody := &model.ExpressionRequest{}
-
-	err := json.NewDecoder(req.Body).Decode(reqBody)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+	if ok := decodeAndValidate(w, req, reqBody); !ok {
 		return
 	}
 
@@ -41,7 +39,7 @@ func (h *Handler) Evaluate(w http.ResponseWriter, req *http.Request) {
 			return
 		}
 
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
@@ -52,25 +50,21 @@ func (h *Handler) Evaluate(w http.ResponseWriter, req *http.Request) {
 
 func (h *Handler) Validate(w http.ResponseWriter, req *http.Request) {
 	reqBody := &model.ExpressionRequest{}
-
-	err := json.NewDecoder(req.Body).Decode(reqBody)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+	if ok := decodeAndValidate(w, req, reqBody); !ok {
 		return
 	}
 
-	err = h.resolver.Validate(reqBody.Expression, req.URL.Path)
+	err := h.resolver.Validate(reqBody.Expression, req.URL.Path)
 	if err != nil {
 		if e, ok := expression.IsExpressionError(err); ok {
 			writeJSON(w, http.StatusBadRequest, model.InvalidExpressionResponse{
 				Valid:  false,
 				Reason: e.Msg,
 			})
-
 			return
 		}
 
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
@@ -113,12 +107,25 @@ func convertToErrorEndpoints(m map[string]int) []model.ErrorEndpoint {
 	return endpoints
 }
 
-func writeJSON(w http.ResponseWriter, status int, v any) {
-	err := json.NewEncoder(w).Encode(v)
+func decodeAndValidate(w http.ResponseWriter, req *http.Request, v any) bool {
+	err := json.NewDecoder(req.Body).Decode(v)
 	if err != nil {
-		http.Error(w, "Marshalling JSON failed.", http.StatusInternalServerError)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return false
 	}
 
+	validate := validator.New()
+	if err = validate.Struct(v); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return false
+	}
+
+	return true
+}
+
+func writeJSON(w http.ResponseWriter, status int, v any) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(status)
+
+	return json.NewEncoder(w).Encode(v)
 }

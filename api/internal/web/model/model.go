@@ -7,7 +7,7 @@ type ExpressionRequest struct {
 	// example: What is 5 plus 3 multiplied by 2?
 	// required: true
 	// in:body
-	Expression string `json:"expression"`
+	Expression string `json:"expression" validate:"required"`
 }
 
 // swagger:model EvaluatedExpression
